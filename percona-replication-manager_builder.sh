@@ -138,6 +138,11 @@ get_system(){
         ARCH=$(echo $(uname -m) | sed -e 's:i686:i386:g')
         OS_NAME="el$RHEL"
         OS="rpm"
+    elif [ -f /etc/amazon-linux-release ]; then
+        RHEL=$(rpm --eval %amzn)
+        ARCH=$(echo $(uname -m) | sed -e 's:i686:i386:g')
+        OS_NAME="amzn$RHEL"
+        OS="rpm"
     else
         ARCH=$(uname -m)
         OS_NAME="$(lsb_release -sc)"
@@ -170,7 +175,6 @@ install_deps() {
         fi
         yum -y install wget
         yum clean all
-        RHEL=$(rpm --eval %rhel)
         INSTALL_LIST="git rpm-build rpmdevtools wget rpmlint"
         yum -y install ${INSTALL_LIST}
     else
@@ -296,8 +300,8 @@ build_rpm(){
     cd rb/SRPMS/
     #
     cd $WORKDIR
-    RHEL=$(rpm --eval %rhel)
-    ARCH=$(echo $(uname -m) | sed -e 's:i686:i386:g')
+    #RHEL=$(rpm --eval %rhel)
+    #ARCH=$(echo $(uname -m) | sed -e 's:i686:i386:g')
     rpmbuild --define "_topdir ${WORKDIR}/rb" --define "dist .$OS_NAME" --define "version ${VERSION}" --rebuild rb/SRPMS/$SRC_RPM
 
     return_code=$?
